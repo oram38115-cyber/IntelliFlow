@@ -127,3 +127,9 @@ Productivity (%) = (Completed Tasks / Total Tasks) × 100
 ## Author
 
 Developed as a software development portfolio project.
+
+## Application Screenshots
+
+### IntelliFlow Dashboard
+
+![IntelliFlow Dashboard](screenshots/dashboard.png)
