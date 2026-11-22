@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task | IntelliFlow</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="auth-body">
+
+    <div class="auth-card">
+        <h1 class="auth-logo">✦ IntelliFlow</h1>
+
+        <h2>Edit Your Task</h2>
+        <p class="auth-subtitle">
+            Update your task details and deadline.
+        </p>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <p class="auth-message">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <label>Task Title</label>
+            <input
+                type="text"
+                name="title"
+                value="{{ task.title }}"
+                required
+            >
+
+            <label>Description</label>
+            <input
+                type="text"
+                name="description"
+                value="{{ task.description or '' }}"
+                placeholder="Enter description"
+            >
+
+            <label>Deadline</label>
+            <input
+                type="date"
+                name="due_date"
+                value="{{ task.due_date.isoformat() if task.due_date else '' }}"
+            >
+
+            <button type="submit" class="auth-button">
+                Save Changes
+            </button>
+
+        </form>
+
+        <p class="auth-footer">
+            <a href="{{ url_for('index') }}">Back to Dashboard</a>
+        </p>
+    </div>
+
+</body>
+</html>

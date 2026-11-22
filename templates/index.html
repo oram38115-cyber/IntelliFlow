@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliFlow | Smart Workflow Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="sidebar">
+       <h2 class="logo">IntelliFlow</h2>
+        <p class="menu-title">WORKSPACE</p>
+        <a href="/" class="active">▦ Dashboard</a>
+        <a href="#tasks">✓ My Tasks</a>
+        <a href="#overview">◷ Overview</a>
+        <div class="sidebar-bottom">
+            <p>Smart work. Better results.</p>
+            <span>IntelliFlow v1.0</span>
+        </div>
+    </div>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <p class="welcome">WORKSPACE / DASHBOARD</p>
+                <h1>Dashboard</h1>
+                <p class="subtitle">Manage your work and stay productive.</p>
+            </div>
+
+            <div class="profile">
+                <div class="avatar">S</div>
+                <div>
+                    <strong>{{ current_user.name }}</strong>
+                    <small>Project Manager</small>
+                </div>
+                <form action="{{ url_for('logout') }}" method="POST">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div>
+                <span class="hero-label">YOUR PRODUCTIVITY SPACE</span>
+                <h2>Welcome to IntelliFlow 👋</h2>
+                <p>Plan smarter, organize tasks, and achieve more every day.</p>
+            </div>
+        </section>
+
+        <section class="stats" id="overview">
+            <div class="stat-card">
+                <div class="stat-icon purple">▦</div>
+                <p>Total Tasks</p>
+                <h2>{{ total_tasks }}</h2>
+                <small>All your tasks</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">◷</div>
+                <p>Pending Tasks</p>
+                <h2>{{ pending_tasks }}</h2>
+                <small>Waiting to be completed</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">✓</div>
+                <p>Completed Tasks</p>
+                <h2>{{ completed_tasks }}</h2>
+                <small>Successfully completed</small>
+            </div>
+        </section>
+        
+<!-- Productivity Progress Section -->
+<section class="productivity-section">
+
+    <div class="section-heading">
+        <div>
+            <h2>Your Productivity</h2>
+            <p>Track your overall task completion progress</p>
+        </div>
+
+        <h2 class="productivity-number">
+            {{ productivity }}%
+        </h2>
+    </div>
+
+    <div class="progress-track">
+        <div class="progress-fill"
+             style="width: {{ productivity }}%;">
+        </div>
+    </div>
+
+    <div class="progress-details">
+        <span>{{ completed_tasks }} Completed</span>
+        <span>{{ total_tasks }} Total Tasks</span>
+    </div>
+
+</section>
+
+        <section class="analytics-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Productivity Analytics</h2>
+                    <p>Track your task completion progress</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="taskChart"></canvas>
+            </div>
+        </section>
+
+        <section class="task-section" id="tasks">
+            <div class="section-heading">
+                <div>
+                    <h2>My Tasks</h2>
+                    <p>Manage your daily activities and deadlines</p>
+                </div>
+                <span class="task-count">{{ total_tasks }} tasks</span>
+            </div>
+
+            <form action="/add" method="POST" class="task-form">
+                <input type="text" name="title"
+                       placeholder="Enter a new task..." required>
+
+                <input type="text" name="description"
+                       placeholder="Short description (optional)">
+
+                <label for="due_date">Due date</label>
+                <input type="date" name="due_date" id="due_date"
+                       min="{{ today.isoformat() }}">
+
+                <button type="submit">+ Add Task</button>
+            </form>
+            
+<div class="task-filters">
+    <input
+        type="text"
+        id="taskSearch"
+        placeholder="Search tasks..."
+    >
+
+    <select id="statusFilter">
+        <option value="all">All Status</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+    </select>
+
+    <select id="priorityFilter">
+        <option value="all">All Priorities</option>
+        <option value="high">High Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="low">Low Priority</option>
+    </select>
+</div>
+
+            <div class="task-list">
+                {% for task in tasks %}
+                <div class="task-item"
+     data-status="{{ task.status|lower }}"
+     data-priority="{{ task.priority|lower }}"
+     data-title="{{ task.title|lower }}"
+     data-description="{{ (task.description or '')|lower }}">
+                    <div class="task-details">
+                        <h3>{{ task.title }}</h3>
+                        <p>{{ task.description or "No description added" }}</p>
+                        <small class="deadline-text">
+                            {% if task.due_date %}
+                                Deadline: {{ task.due_date.strftime('%d %b %Y') }}
+                                {% if task.status != "Completed" and task.due_date < today %}
+                                    <span class="overdue-label">Overdue</span>
+                                {% elif task.status != "Completed" and task.due_date == today %}
+                                    <span class="today-label">Due today</span>
+                                {% endif %}
+                            {% else %}
+                                No deadline set
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <span class="status {{ 'completed' if task.status == 'Completed' else 'pending' }}">
+                        {{ task.status }}
+                    </span>
+
+                    <span class="priority {{ task.priority|lower }}">
+                        {{ task.priority }} Priority
+                    </span>
+
+                   <div class="task-actions">
+    {% if task.status != "Completed" %}
+    <a href="/complete/{{ task.id }}" class="complete-btn">Complete</a>
+    {% endif %}
+
+    <a href="{{ url_for('edit_task', task_id=task.id) }}"
+       class="edit-btn">Edit</a>
+
+    <a href="/delete/{{ task.id }}" class="delete-btn">Delete</a>
+</div>
+                </div>
+
+                {% else %}
+                <div class="empty-state">
+                    <div>📋</div>
+                    <h3>No tasks yet</h3>
+                    <p>Add your first task to get started!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <footer>
+            © 2026 IntelliFlow. Smart Workflow Management System.
+        </footer>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    const chartElement = document.getElementById("taskChart");
+
+    new Chart(chartElement, {
+        type: "doughnut",
+        data: {
+            labels: ["Completed Tasks", "Pending Tasks"],
+            datasets: [{
+                data: [
+                    {{ completed_tasks }},
+                    {{ pending_tasks }}
+                ],
+                backgroundColor: ["#2ba76c", "#6d5dfc"],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            },
+            cutout: "70%"
+        }
+    });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
