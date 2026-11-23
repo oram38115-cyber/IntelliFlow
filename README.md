@@ -133,3 +133,6 @@ Developed as a software development portfolio project.
 ### IntelliFlow Dashboard
 
 ![IntelliFlow Dashboard](screenshots/dashboard.png)
+### Task Management
+
+![IntelliFlow Task Management](screenshots/tasks.png)
