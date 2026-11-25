@@ -295,31 +295,34 @@ def delete_task(task_id):
 
 
 # Create and update database
+
+# Initialize database when the application starts
+with app.app_context():
+    db.create_all()
+
+    with db.engine.begin() as connection:
+        columns = connection.exec_driver_sql(
+            "PRAGMA table_info(task)"
+        ).fetchall()
+
+        column_names = [column[1] for column in columns]
+
+        if "priority" not in column_names:
+            connection.exec_driver_sql(
+                "ALTER TABLE task ADD COLUMN priority "
+                "VARCHAR(20) DEFAULT 'Medium'"
+            )
+
+        if "user_id" not in column_names:
+            connection.exec_driver_sql(
+                "ALTER TABLE task ADD COLUMN user_id INTEGER"
+            )
+
+        if "due_date" not in column_names:
+            connection.exec_driver_sql(
+                "ALTER TABLE task ADD COLUMN due_date DATE"
+            )
+
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-
-        with db.engine.begin() as connection:
-            columns = connection.exec_driver_sql(
-                "PRAGMA table_info(task)"
-            ).fetchall()
-
-            column_names = [column[1] for column in columns]
-
-            if "priority" not in column_names:
-                connection.exec_driver_sql(
-                    "ALTER TABLE task ADD COLUMN priority "
-                    "VARCHAR(20) DEFAULT 'Medium'"
-                )
-
-            if "user_id" not in column_names:
-                connection.exec_driver_sql(
-                    "ALTER TABLE task ADD COLUMN user_id INTEGER"
-                )
-
-            if "due_date" not in column_names:
-                connection.exec_driver_sql(
-                    "ALTER TABLE task ADD COLUMN due_date DATE"
-                )
-
     app.run(debug=True)
